@@ -112,7 +112,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "not found")
     })
     public ResponseEntity<Void> delete(@PathVariable Long id){
-        log.info("#### endpoint para eliminar clinicas por id");
+        log.info("#### endpoint para eliminar usuario por id");
         userService.delete(id);
         return ResponseEntity.ok().build();
     }

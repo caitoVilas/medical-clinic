@@ -1,0 +1,25 @@
+server:
+  port: 8090
+  servlet:
+    context-path: /medicalClinic
+application:
+  title: medical clinic
+  version: 1.0.0SNAPSHOT
+
+# DATASOURCE
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/medical_db
+    username: caito
+    password: Caitoful707
+
+## POOL DE CONECCIONES
+    hikari:
+      connection-timeout: 20000
+      maximun-pool-size: 5
+
+## JPA
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true

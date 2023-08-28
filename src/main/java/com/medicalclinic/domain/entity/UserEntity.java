@@ -26,6 +26,10 @@ public class UserEntity {
     private Long id;
     private String username;
     private String password;
+    private String fullName;
+    private String tel;
+    private String dni;
+    private String email;
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"),
     inverseJoinColumns = @JoinColumn(name = "role_id"))

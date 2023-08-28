@@ -9,9 +9,9 @@ application:
 # DATASOURCE
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/clinical_db
-    username: root
-    password: root
+    url: jdbc:postgresql://localhost:5432/medical_db
+    username: caito
+    password: Caitoful707
 
 ## POOL DE CONECCIONES
     hikari:
@@ -19,15 +19,6 @@ spring:
       maximun-pool-size: 5
 
 ## JPA
-logging:
-  level:
-    org:
-      hibernate:
-        SQL: DEBUG
-        type:
-          descriptor:
-            sql:
-              BasicBinder: TRACE
   jpa:
     hibernate:
       ddl-auto: update

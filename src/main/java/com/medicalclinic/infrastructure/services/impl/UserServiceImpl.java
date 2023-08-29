@@ -1,5 +1,7 @@
 package com.medicalclinic.infrastructure.services.impl;
 
+import com.medicalclinic.api.exceptions.custom.BadRequestException;
+import com.medicalclinic.api.exceptions.custom.NotFoundException;
 import com.medicalclinic.api.models.request.RoleRequest;
 import com.medicalclinic.api.models.request.UserChangeRequest;
 import com.medicalclinic.api.models.request.UserRequest;
@@ -47,17 +49,21 @@ public class UserServiceImpl implements UserService {
         log.info("---> validando entradas...");
         if (userRepository.existsByUsername(request.getUsername())){
             log.error("ERROR: el alias {} ya esta registrado", request.getUsername());
-            throw new RuntimeException();
+            throw new BadRequestException("el alias "+ request.getUsername()+ " ya esta registrado");
         }
         if (userRepository.existsByDni(request.getDni())){
             log.error("ERROR: el dni {} ya esta registrado", request.getDni());
-            throw new RuntimeException();
+            throw new BadRequestException("el dni "+ request.getDni()+ " ya esta registrado");
         }
         if (userRepository.existsByEmail(request.getEmail())){
             log.error("ERROR: el email {} ya esta registrado", request.getEmail());
-            throw new RuntimeException();
+            throw new BadRequestException("el email "+ request.getEmail()+" ya esta registrado");
         }
-        var clinical = clinicalRepository.findById(request.getClinicalId()).orElseThrow();
+        var clinical = clinicalRepository.findById(request.getClinicalId())
+                .orElseThrow(()-> {
+                    log.error("ERROR: no existe la clinica con id {}", request.getClinicalId());
+                    return new NotFoundException("no existe la clinica con id "+ request.getClinicalId());
+                });
         var roles = new HashSet<Role>();
         RoleName name = null;
         for (String roleName: request.getRoles()){
@@ -88,7 +94,10 @@ public class UserServiceImpl implements UserService {
     public UserResponse read(Long id) {
         log.info("---> inicio servicio buscar usario por id");
         log.info("---> buscando usuario con id {}", id);
-        var user = userRepository.findById(id).orElseThrow();
+        var user = userRepository.findById(id).orElseThrow(()-> {
+            log.error("ERROR: no existe un usuario con id {}", id);
+            return new NotFoundException("no existe un usuario con id "+ id);
+        });
         log.info("---> finalizado servicio buscar usuario por id");
         return this.mapToDto(user);
     }
@@ -102,7 +111,10 @@ public class UserServiceImpl implements UserService {
     public void delete(Long id) {
         log.info("---> inicio servicio eliminar usuario por id");
         log.info("---> buscando usuario por id {}", id);
-        userRepository.findById(id).orElseThrow();
+        userRepository.findById(id).orElseThrow(()-> {
+            log.error("ERROR: no existe un usuario con id {}", id);
+            return new NotFoundException("no existe un usuario con id "+ id);
+        });
         userRepository.deleteById(id);
         log.info("finalizsado servicio eliminar id");
     }
@@ -128,19 +140,22 @@ public class UserServiceImpl implements UserService {
     public UserResponse update(Long id, UserChangeRequest request) {
         log.info("---> inicio servicio actulaizar usuario");
         log.info("---> buscando usuario id {}",id);
-        var user = userRepository.findById(id).orElseThrow();
+        var user = userRepository.findById(id).orElseThrow(()-> {
+            log.error("ERROR: no existe un usuario con id {}", id);
+            return new NotFoundException("no existe un usuario con id "+ id);
+        });
         log.info("---> iniciando validaciones...");
         if (userRepository.userForUsername(id, request.getUsername()) != null){
             log.error("ERROR: ya existe otro usuario con el alias {}", request.getUsername());
-            throw new RuntimeException();
+            throw new BadRequestException("ya existe otro usuario con el alias "+ request.getUsername());
         }
         if (userRepository.userForDni(id,request.getDni()) != null){
             log.error("ERROR: ya existe otro usuario con el dni {}", request.getDni());
-            throw new RuntimeException();
+            throw new BadRequestException("ya existe otro usuario con el dni "+ request.getDni());
         }
         if (userRepository.userForEmail(id, request.getEmail()) != null){
             log.error("ERROR: ya existe otro usuario con el email {}", request.getEmail());
-            throw new RuntimeException();
+            throw new BadRequestException("ya existe otro usuario con el email "+ request.getEmail());
         }
         log.info("---> guardando actualizacion...");
         if (!user.getUsername().isEmpty()) user.setUsername(request.getUsername());

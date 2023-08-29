@@ -1,5 +1,7 @@
 package com.medicalclinic.infrastructure.services.impl;
 
+import com.medicalclinic.api.exceptions.custom.BadRequestException;
+import com.medicalclinic.api.exceptions.custom.NotFoundException;
 import com.medicalclinic.api.models.response.SpecialityResponse;
 import com.medicalclinic.domain.entity.SpecialityEntity;
 import com.medicalclinic.domain.repository.SpecialityRepository;
@@ -28,11 +30,11 @@ public class SpecialityServiceImpl implements SpecialityService {
         log.info("---> validando datos");
         if (request.isEmpty()){
             log.error("ERROR: el nombre es requerido");
-            throw new RuntimeException();
+            throw new BadRequestException("el nombre es requerido");
         }
         if (specialityRepository.existsByName(request)){
             log.error("ERROR: la especialidad {} ya exite", request);
-            throw new RuntimeException();
+            throw new BadRequestException("la especialidad "+request+ " ya exite");
         }
         log.info("---> guardando especialidad...");
         var speciality = SpecialityEntity.builder()
@@ -46,7 +48,10 @@ public class SpecialityServiceImpl implements SpecialityService {
     public SpecialityResponse read(Long id) {
         log.info("---> inicio servicio buscar especialidad por id");
         log.info("---> buscando especialidad id {}", id);
-        var speciality = specialityRepository.findById(id).orElseThrow();
+        var speciality = specialityRepository.findById(id).orElseThrow(()-> {
+            log.error("ERROR: no existe la especialidad con id {}", id);
+            return new NotFoundException("no existe la especialidad con id "+id);
+        });
         log.info("---> finalizado servicio buscar especialidad por id");
         return this.mapToDto(speciality);
     }
@@ -60,7 +65,10 @@ public class SpecialityServiceImpl implements SpecialityService {
     public void delete(Long id) {
         log.info("---> inicio servicio eliminar especialidad por id");
         log.info("---> buscando especialidad id {}", id);
-        var speciality = specialityRepository.findById(id).orElseThrow();
+        var speciality = specialityRepository.findById(id).orElseThrow(()-> {
+            log.error("ERROR: no existe la especialidad con id {}", id);
+            return new NotFoundException("no existe la especialidad con id "+id);
+        });
         specialityRepository.deleteById(id);
     }
 

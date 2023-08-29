@@ -1,5 +1,7 @@
 package com.medicalclinic.infrastructure.services.impl;
 
+import com.medicalclinic.api.exceptions.custom.BadRequestException;
+import com.medicalclinic.api.exceptions.custom.NotFoundException;
 import com.medicalclinic.api.models.response.SocialWorkResponse;
 import com.medicalclinic.domain.entity.SocialWorkEntity;
 import com.medicalclinic.domain.repository.SocialWorkRepository;
@@ -43,7 +45,10 @@ public class SocialWorkServiceImpl implements SocialWorkService {
     public SocialWorkResponse read(Long id) {
         log.info("---> inicio servico buscar obra social por id");
         log.info("---> buscando obra social con id {}", id);
-        var socialWork = socialWorkRepository.findById(id).orElseThrow();
+        var socialWork = socialWorkRepository.findById(id).orElseThrow(()-> {
+            log.error("ERROR: no existe la obra social con id {}", id);
+            return new NotFoundException("no existe la obra social con id "+id);
+        });
         log.info("---> finalizado servicio buscar obra social por id");
         return this.mapToDto(socialWork);
     }
@@ -57,7 +62,10 @@ public class SocialWorkServiceImpl implements SocialWorkService {
     public void delete(Long id) {
         log.info("---> inicio servicio eliminar obra social por id");
         log.info("---> buscando obra social con id {}", id);
-        socialWorkRepository.findById(id).orElseThrow();
+        socialWorkRepository.findById(id).orElseThrow(()-> {
+            log.error("ERROR: no existe la obra social con id {}", id);
+            return new NotFoundException("no existe la obra social con id "+id);
+        });
         socialWorkRepository.deleteById(id);
         log.info("finalizado servicio eliminar obra social por id");
     }
@@ -65,12 +73,12 @@ public class SocialWorkServiceImpl implements SocialWorkService {
     private void validateSocialWork(String businessName){
         if (businessName.isEmpty()){
             log.error("ERROR: la razon social es requerida");
-            throw new RuntimeException();
+            throw new BadRequestException("la razon social es requerida");
         }
 
         if (socialWorkRepository.existsByBusinessName(businessName)){
             log.error("ERROR: la razon social {} ya esta asignada", businessName);
-            throw new RuntimeException();
+            throw new BadRequestException("la razon social "+businessName+" ya esta asignada");
         }
     }
 

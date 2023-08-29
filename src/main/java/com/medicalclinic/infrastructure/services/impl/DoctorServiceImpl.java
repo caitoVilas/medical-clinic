@@ -1,5 +1,7 @@
 package com.medicalclinic.infrastructure.services.impl;
 
+import com.medicalclinic.api.exceptions.custom.BadRequestException;
+import com.medicalclinic.api.exceptions.custom.NotFoundException;
 import com.medicalclinic.api.models.request.DoctorRequest;
 import com.medicalclinic.api.models.response.DoctorResponse;
 import com.medicalclinic.api.models.response.SpecialityResponse;
@@ -61,7 +63,10 @@ public class DoctorServiceImpl implements DoctorService {
     public DoctorResponse read(Long id) {
         log.info("---> inicio servicio buscar medico por id");
         log.info("---> buscando medico con id {}", id);
-        var doctor = doctorRepository.findById(id).orElseThrow();
+        var doctor = doctorRepository.findById(id).orElseThrow(()->{
+            log.error("ERROR: no se encuentra medico con id {}", id);
+            return new NotFoundException("no se encuentra medico con id " + id);
+        });
         log.info("---> finalizado servicio buscar medico por id");
         return this.mapToDto(doctor);
     }
@@ -70,21 +75,24 @@ public class DoctorServiceImpl implements DoctorService {
     public DoctorResponse update(Long id, DoctorRequest request) {
         log.info("---> inicio servicio modificare medico");
         log.info("---> buscando medico con id {}", id);
-        var doctor = doctorRepository.findById(id).orElseThrow();
+        var doctor = doctorRepository.findById(id).orElseThrow(()->{
+            log.error("ERROR: no se encuentra medico con id {}", id);
+            return new NotFoundException("no se encuentra medico con id " + id);
+        });
         if (!request.getName().isEmpty()) doctor.setName(request.getName());
         log.info("---> validando datos...");
         if (!request.getLicence().isEmpty()){
             if (doctorRepository.doctorForLicence(id, request.getLicence()) != null){
                 log.error("ERROR: licencia {} pertenece a otro medico", request.getLicence());
-                throw new RuntimeException();
+                throw new BadRequestException("licencia " + request.getLicence()+ " pertenece a otro medico");
             }else {
                 doctor.setLicence(request.getLicence());
             }
         }
         if (!request.getDni().isEmpty()){
             if (doctorRepository.doctorForDni(id, request.getDni()) != null){
-                log.error("ERROR: el dni {} pertenece a otro medico", request.getLicence());
-                throw new RuntimeException();
+                log.error("ERROR: el dni {} pertenece a otro medico", request.getDni());
+                throw new BadRequestException("el dni "+request.getDni() + " pertenece a otro medico" );
             }else {
                 doctor.setDni(request.getDni());
             }
@@ -92,7 +100,7 @@ public class DoctorServiceImpl implements DoctorService {
         if (!request.getEmail().isEmpty()){
             if (doctorRepository.doctorForEmail(id, request.getEmail()) != null){
                 log.error("ERROR: el email {} pertenece a otro medico", request.getEmail());
-                throw new RuntimeException();
+                throw new BadRequestException("el email " + request.getEmail()+ " pertenece a otro medico");
             }else {
                 doctor.setEmail(request.getEmail());
             }
@@ -106,7 +114,10 @@ public class DoctorServiceImpl implements DoctorService {
     public void delete(Long id) {
         log.info("---> inicio servicio eliminar medico por id");
         log.info("---> uscando medico por id {}", id);
-        doctorRepository.findById(id).orElseThrow();
+        doctorRepository.findById(id).orElseThrow(()->{
+            log.error("ERROR: no se encuentra medico con id {}", id);
+            return new NotFoundException("no se encuentra medico con id " + id);
+        });
         log.info("---> finalizado servicio eliminar medico por id");
         doctorRepository.deleteById(id);
     }
@@ -131,47 +142,47 @@ public class DoctorServiceImpl implements DoctorService {
     private void validateDoctor(DoctorRequest doctor){
         if (doctor.getName().isEmpty()){
             log.error("ERROR: el nombre del medico es requerido");
-            throw new RuntimeException();
+            throw new BadRequestException("el nombre del medico es requerido");
         }
 
         if (doctor.getLicence().isEmpty()){
             log.error("ERROR: la licenciae del medico es requerido");
-            throw new RuntimeException();
+            throw new BadRequestException("la licenciae del medico es requerido");
         }
 
         if (doctor.getDni().isEmpty()){
             log.error("ERROR: el dni del medico es requerido");
-            throw new RuntimeException();
+            throw new BadRequestException("el dni del medico es requerido");
         }
 
         if (doctor.getEmail().isEmpty()){
             log.error("ERROR: el email del medico es requerido");
-            throw new RuntimeException();
+            throw new BadRequestException("el email del medico es requerido");
         }
         if (doctorRepository.existsByLicence(doctor.getLicence())){
             log.error("ERROR: la licencia {} esta asignada a otro medico", doctor.getLicence());
-            throw new RuntimeException();
+            throw new BadRequestException("la licencia " + doctor.getLicence()+ " esta asignada a otro medico");
         }
 
         if (doctorRepository.existsByDni(doctor.getDni())){
             log.error("ERROR: el dni {} esta asignado a otro medico", doctor.getDni());
-            throw new RuntimeException();
+            throw new BadRequestException("el dni " + doctor.getDni()+ " esta asignado a otro medico");
         }
 
         if (doctorRepository.existsByEmail(doctor.getEmail())){
             log.error("ERROR: el email {} esta asignado a otro medico", doctor.getEmail());
-            throw new RuntimeException();
+            throw new BadRequestException("el email "+ doctor.getEmail()+" esta asignado a otro medico");
         }
 
         if (doctor.getSpecialities().isEmpty()){
             log.error("ERROR: no se asigno especialidad");
-            throw new RuntimeException();
+            throw new BadRequestException("no se asigno especialidad");
         }
 
         doctor.getSpecialities().forEach(sp -> {
             if (!specialityRepository.existsByName(sp)){
                 log.error("ERROR: no existe la especialidad {}", sp);
-                throw new RuntimeException();
+                throw new BadRequestException("no existe la especialidad "+sp);
             }
         });
     }

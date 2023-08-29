@@ -1,5 +1,7 @@
 package com.medicalclinic.infrastructure.services.impl;
 
+import com.medicalclinic.api.exceptions.custom.BadRequestException;
+import com.medicalclinic.api.exceptions.custom.NotFoundException;
 import com.medicalclinic.api.models.request.PatientRequest;
 import com.medicalclinic.api.models.response.ClinicalResponse;
 import com.medicalclinic.api.models.response.PatientResponse;
@@ -45,9 +47,17 @@ public class PatientServiceImpl implements PatientService {
         this.validatePatient(request);
         log.info("---> guardando paciente...");
         log.info("---> asignando clinica...");
-        var clinical = clinicalRepository.findById(request.getClinicalId()).orElseThrow();
+        var clinical = clinicalRepository.findById(request.getClinicalId())
+                .orElseThrow(()->{
+                    log.error("ERROR: no existe la clinica con id {}", request.getClinicalId());
+                    return new NotFoundException("no existe la clinica con id " + request.getClinicalId());
+                });
         log.info("---> asignando obra social...");
-        var socialWok = socialWorkRepository.findById(request.getSocialWorkId()).orElseThrow();
+        var socialWok = socialWorkRepository.findById(request.getSocialWorkId())
+                .orElseThrow(()-> {
+                    log.error("ERROR: no existe la obra social con id {}", request.getSocialWorkId());
+                    return new NotFoundException("no existe la obra social con id " + request.getSocialWorkId());
+                });
         var patient = PatientEntity.builder()
                 .fullName(request.getFullName())
                 .dni(request.getDni())
@@ -73,7 +83,10 @@ public class PatientServiceImpl implements PatientService {
     public PatientResponse read(Long id) {
         log.info("---> inicio servicio buscar paciente por id");
         log.info("---> buscando paciente id {}", id);
-        var patient = patientRepository.findById(id).orElseThrow();
+        var patient = patientRepository.findById(id).orElseThrow(()-> {
+            log.error("ERROR: no existe el paciente con id {}", id);
+            return new NotFoundException("no existe el paciente con id " + id);
+        });
         log.info("finalizado servicio buscar paciento por id");
         return this.mapToDto(patient);
     }
@@ -87,7 +100,10 @@ public class PatientServiceImpl implements PatientService {
     public void delete(Long id) {
         log.info("---> inicio servicio eliminar paciente por id");
         log.info("---> buscando paciente id {}", id);
-        patientRepository.findById(id).orElseThrow();
+        patientRepository.findById(id).orElseThrow(()-> {
+            log.error("ERROR: no existe el paciente con id {}", id);
+            return new NotFoundException("no existe el paciente con id " + id);
+        });
         patientRepository.deleteById(id);
         log.info("---> finalizado servicio eliminar paciente por id");
     }
@@ -96,7 +112,11 @@ public class PatientServiceImpl implements PatientService {
     public PatientResponse getByFullName(String fullName) {
         log.info("---> inicio servicio buscar paciente por nombre");
         log.info("---> buscando paciente nombre {}", fullName);
-        var patient = patientRepository.findByFullNameContaining(fullName).orElseThrow();
+        var patient = patientRepository.findByFullNameContaining(fullName)
+                .orElseThrow(()-> {
+                    log.error("ERROR: no existe el paciente con nombre {}", fullName);
+                    return new NotFoundException("no existe el paciente con nombre " + fullName);
+                });
         log.info("finalizado servicio buscar paciento por nombre");
         return this.mapToDto(patient);
     }
@@ -120,36 +140,42 @@ public class PatientServiceImpl implements PatientService {
 
     private void validatePatient(PatientRequest patient){
         if (patient.getFullName().isEmpty()){
-            log.error("ERROR: el nombre del cliente es requerido");
-            throw new RuntimeException();
+            log.error("ERROR: el nombre del paciente es requerido");
+            throw new BadRequestException("el nombre del paciente es requerido");
         }
 
         if (patient.getDni().isEmpty()){
             log.error("ERROR: el dni del paciente es requerido");
-            throw new RuntimeException();
+            throw new BadRequestException("el dni del paciente es requerido");
         }
         if (patientRepository.existsByDni(patient.getDni())){
             log.error("ERROR: ya existe un paciente con dni {}", patient.getDni());
-            throw new RuntimeException();
+            throw new BadRequestException("ya existe un paciente con dni " + patient.getDni());
         }
         if (patient.getEmail().isEmpty()){
             log.error("ERROR: el email del cliente es requerido");
-            throw new RuntimeException();
+            throw new BadRequestException("el email del cliente es requerido");
         }
         if (patientRepository.existsByEmail(patient.getEmail())){
             log.error("ERROR: el email {} esta asignado a otro paciente", patient.getEmail());
-            throw new RuntimeException();
+            throw new BadRequestException("el email "+ patient.getEmail()+" esta asignado a otro paciente");
         }
         if (patient.getClinicalId() == null){
             log.error("ERROR: la clinica es requerida");
-            throw new RuntimeException();
+            throw new BadRequestException("la clinica es requerida");
         }
-        clinicalRepository.findById(patient.getClinicalId()).orElseThrow();
+        clinicalRepository.findById(patient.getClinicalId()).orElseThrow(()-> {
+            log.error("ERROR: no existe la clinica con id {}", patient.getClinicalId());
+            return new NotFoundException("no existe la clinica con id " +patient.getClinicalId());
+        });
         if (patient.getSocialWorkId() == null){
             log.error("ERROR: la obra social es requerida");
-            throw new RuntimeException();
+            throw new BadRequestException("la obra social es requerida");
         }
-        socialWorkRepository.findById(patient.getSocialWorkId()).orElseThrow();
+        socialWorkRepository.findById(patient.getSocialWorkId()).orElseThrow(()-> {
+            log.error("ERROR: no existe la obra social con id {}", patient.getSocialWorkId());
+            return new NotFoundException("no existe la obra social con id " +patient.getSocialWorkId());
+        });
 
     }
 

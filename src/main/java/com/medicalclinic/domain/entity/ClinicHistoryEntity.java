@@ -1,9 +1,6 @@
 package com.medicalclinic.domain.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
@@ -17,7 +14,8 @@ import java.util.List;
 @Table(name = "clinical_histories")
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @Builder
 public class ClinicHistoryEntity {
     @Id

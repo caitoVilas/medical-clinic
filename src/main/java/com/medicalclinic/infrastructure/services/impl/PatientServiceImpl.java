@@ -188,6 +188,7 @@ public class PatientServiceImpl implements PatientService {
                 .email(patient.getEmail())
                 .clinical(this.mapClinical(patient.getClinical()))
                 .socialWork(this.mapToSocialWork(patient.getSocialWork()))
+                .SocialWorkMembership(patient.getSocialWorkMembership())
                 .build();
     }
 

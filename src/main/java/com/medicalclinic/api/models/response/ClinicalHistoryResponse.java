@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author claudio.vilas
@@ -16,13 +17,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Data
 @Builder
-public class PatientResponse implements Serializable {
+public class ClinicalHistoryResponse implements Serializable {
     private Long id;
-    private String fullName;
-    private String dni;
-    private String tel;
-    private String email;
-    private ClinicalResponse clinical;
-    private SocialWorkResponse socialWork;
-    private String SocialWorkMembership;
+    private String patient;
+    private List<HistoryDetalResponse> details;
 }

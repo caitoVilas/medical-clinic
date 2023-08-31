@@ -1,11 +1,13 @@
 package com.medicalclinic.api.models.response;
 
+import com.medicalclinic.domain.repository.ClinicalRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 
 /**
  * @author claudio.vilas
@@ -16,13 +18,9 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Data
 @Builder
-public class PatientResponse implements Serializable {
+public class HistoryDetalResponse implements Serializable {
     private Long id;
-    private String fullName;
-    private String dni;
-    private String tel;
-    private String email;
-    private ClinicalResponse clinical;
-    private SocialWorkResponse socialWork;
-    private String SocialWorkMembership;
+    private LocalDate date;
+    private String history;
+    private DoctorResponse doctor;
 }

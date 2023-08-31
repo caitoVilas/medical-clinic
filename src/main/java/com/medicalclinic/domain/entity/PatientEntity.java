@@ -1,9 +1,6 @@
 package com.medicalclinic.domain.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -16,7 +13,8 @@ import javax.persistence.*;
 @Table(name = "patients")
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @Builder
 public class PatientEntity {
     @Id
@@ -32,7 +30,8 @@ public class PatientEntity {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "socialWork_id")
     private SocialWorkEntity socialWork;
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private String SocialWorkMembership;
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "clinicalHistory_id")
     private ClinicHistoryEntity clinicalHistory;
 

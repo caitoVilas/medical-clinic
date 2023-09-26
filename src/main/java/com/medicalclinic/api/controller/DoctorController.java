@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
  */
 
 @RestController
-@RequestMapping("/api/v1/doctors")
+@RequestMapping("/api/v1/clinical/doctors")
 @Slf4j
 @Tag(name = "Clinica - Medicos")
 @RequiredArgsConstructor

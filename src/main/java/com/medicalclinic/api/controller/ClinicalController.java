@@ -25,7 +25,7 @@ import javax.validation.Valid;
  */
 
 @RestController
-@RequestMapping("/api/v1/clinical")
+@RequestMapping("/api/v1/clinical/clinicals")
 @Slf4j
 @Tag(name = "Clinica - Clinicas")
 @RequiredArgsConstructor
